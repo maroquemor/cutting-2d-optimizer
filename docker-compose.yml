@@ -1,0 +1,33 @@
+﻿version: '3.8'
+
+services:
+  backend:
+    image: python:3.9-slim
+    container_name: cutting_optimizer_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             python run.py"
+    restart: unless-stopped
+
+  frontend:
+    image: node:18-alpine
+    container_name: cutting_optimizer_web
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    command: >
+      sh -c "npm install &&
+             npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
+    restart: unless-stopped
